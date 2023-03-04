@@ -6,6 +6,7 @@ apiKey: setting.OPENAI_APIKEY,
 });
 const openai = new OpenAIApi(configuration);
 const mtz = require("moment-timezone");
+const fetch = require("node-fetch");
 const bot = new Telegraf(BOT_TOKEN);
 const client = bot.telegram;
 chatbot = {};
@@ -14,7 +15,18 @@ function reply(chatid, message, msgid, opts) {
     return client.sendMessage(chatid, message, { reply_to_message_id: msgid, ...opts });
 }
 
-
+/* 
+function replyMulti(chatid, message, msgid, opts) {
+    let messages = message.split('');
+    let messageCount = messages.length;
+    let i = 0;
+    while (i < messageCount) {
+        let messagePart = messages.slice(i, i + 4096).join('');
+        client.sendMessage(chatid, messagePart, { reply_to_message_id: msgid, ...opts });
+        i += 4096;
+    }
+}
+*/
 bot.on('message', async (ctx) => {
     let body = ctx.message.text || ctx.message.caption || "";
     let chatId = ctx.message.chat.id;
@@ -70,8 +82,12 @@ https://t.me/${bot.botInfo.username.toLowerCase()}`;
         case "/ping":
                 det = new Date
                 x = await reply(chatId, "Testing ping...", messageId)
-                dex = new Date - det
-                client.editMessageText(chatId, x.message_id, null, `Pong!!!\nSpeed : ${dex < 1000 ? dex : dex / 1000} ${dex < 1000 ? "ms" : "Seconds"}`);
+                dex = new Date - det;
+                sai = new Date();
+                await client.editMessageText(chatId, x.message_id, null, `Try Connecting to openai...`);
+                await fetch("https://api.openai.com");
+                let zzz = new Date - sai;
+                client.editMessageText(chatId, x.message_id, null, `Pong!!!\nSpeed : ${dex < 1000 ? dex : dex / 1000} ${dex < 1000 ? "ms" : "Seconds"}\nAPI OpenAI : ${zzz < 1000 ? zzz : zzz / 1000} ${zzz < 1000 ? "ms" : "Seconds"}`);
                 break
         default:
         if (!body) return 
