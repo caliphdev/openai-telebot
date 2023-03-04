@@ -2,7 +2,7 @@
 Simple Chat Bot AI yang dibuat oleh Caliph Dev
 
 ## Preview
-<a href="//t.me/openai_robot"><img width="60%" src="https://filezone.my.id/file/5l9tqq426hg9k7zzqlft.png" /></a>
+<a href="//t.me/openai_robot" ><img width="60%" src="https://m.caliph.my.id/public/storage/projects/9440050548f3e764ddcc288af3a94233.png" /></a>
 
 ### Thanks To
 * [`Telegraf`](https://telegraf.js.org)
