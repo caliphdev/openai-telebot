@@ -28,6 +28,7 @@ function replyMulti(chatid, message, msgid, opts) {
 }
 */
 bot.on('message', async (ctx) => {
+    try {
     let body = ctx.message.text || ctx.message.caption || "";
     let chatId = ctx.message.chat.id;
     let userId = ctx.message.from.id;
@@ -44,7 +45,7 @@ bot.on('message', async (ctx) => {
     let args = body.split(" ").slice(1);
     let command = body.split(" ")[0].toLowerCase();
     if (!global.chatbot[userId]) {
-    chatbot[userId] = [`Ai: [${mtz.tz("Asia/Jakarta").locale("id").format("dddd, DD MMMM YYYY, HH:mm:ss")}]: Aku Adalah Chatbot Yang Di Ciptakan oleh Caliph Dev!`];
+    chatbot[userId] = [{ role: "assistant", content: "Hai, saya adalah chatbot yang akan membantu kamu menjawab pertanyaan kamu." }];
     }
 
     switch (command) {
@@ -60,7 +61,7 @@ https://t.me/${bot.botInfo.username.toLowerCase()}`;
       [{ text: '💌 Owner', url: "tg://user?id="+OWNER_ID[0] }, { text: "🔗 Source Code", url: "https://github.com/caliphdev/openai-telebot" }],
       [{ text: "❤️ Share Bot ini", url: "https://t.me/share/url?"+new URLSearchParams({ text: shareText }) }]
     ]
-  } });
+  } }).catch((e) => console.log(e));
     break;
         
         case ">":
@@ -81,36 +82,34 @@ https://t.me/${bot.botInfo.username.toLowerCase()}`;
         break;
         case "/ping":
                 det = new Date
-                x = await reply(chatId, "Testing ping...", messageId)
+                reply(chatId, "Testing ping...", messageId).then(async (x) => {
                 dex = new Date - det;
                 sai = new Date();
                 await client.editMessageText(chatId, x.message_id, null, `Try Connecting to openai...`);
                 await fetch("https://api.openai.com");
                 let zzz = new Date - sai;
                 client.editMessageText(chatId, x.message_id, null, `Pong!!!\nSpeed : ${dex < 1000 ? dex : dex / 1000} ${dex < 1000 ? "ms" : "Seconds"}\nAPI OpenAI : ${zzz < 1000 ? zzz : zzz / 1000} ${zzz < 1000 ? "ms" : "Seconds"}`);
+                });
                 break
         default:
         if (!body) return 
         client.sendChatAction(chatId, "typing");
-        chatbot[userId].push(`Human: [${mtz.tz("Asia/Jakarta").locale("id").format("dddd, DD MMMM YYYY, HH:mm:ss")}]: ${body}`)
-        chatbot[userId].push(`Ai: [${mtz.tz("Asia/Jakarta").locale("id").format("dddd, DD MMMM YYYY, HH:mm:ss")}]:`)
-try {
-const response = await openai.createCompletion({
-          model: "text-davinci-003",
-          prompt: chatbot[userId].join("\n"),
-          temperature: 0,
-          max_tokens: MAX_TOKEN,
-          stop: ["Ai:", "Human:"],
-          top_p: 1,
-          frequency_penalty: 0.2,
-          presence_penalty: 0,
-        });
+        chatbot[userId].push({role: "user", content: body});
+        openai.createChatCompletion({
+            model: "gpt-3.5-turbo",
+            messages: chatbot[userId],
+          }).then(response => {
         if (setting.debug) console.log(response.data);
-reply(chatId, response.data.choices[0].text.trim(), messageId);
-} catch (e) {
+        chatbot[userId].push(response.data.choices[0].message);
+reply(chatId, response.data.choices[0].message.content.trim(), messageId);
+}).catch(e => {
+    console.log(e);
 reply(chatId, "Server Error, AI Not Responding...", messageId);
-} 
+});
         break;
+    }
+    } catch (e) {
+        console.log(e)
     }
 });
 
